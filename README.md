@@ -55,7 +55,7 @@ In a single query, perform the following operations and generate a new table in 
 - Generate a new avg_transaction column as the sales value divided by transactions rounded to 2 decimal places for each record
 
 *Firstly, I created my table 'clean_weekly_sales' with correct data_type for each column and added the new columns stated.
-NOTE: I have already created a tbale 'weekily_sales' using the schema provided in the challenge*
+NOTE: I have already created a table 'weekily_sales' using the schema provided in the challenge*
 ```sql
 DROP TABLE IF EXISTS clean_weekly_sales;
 CREATE TABLE clean_weekly_sales (
@@ -78,7 +78,7 @@ PRIMARY KEY(id)
 ```
 *Using a single query to clean the data. I created a subquery which consisted of the **STR_TO_DATE** function that converted the week_date in string format to **DATE** data type. 
 Also I used multiple **CASE** statements to return matching values in this process I got rid of all 'null' instances and replaced then with 'unknown'. 
-Then I calculated for the 'avg_transactions' column dividng the sales by the number of transactions*
+Then I calculated for the 'avg_transactions' column by dividng the sales by the number of transactions*
 ```sql
 INSERT INTO clean_weekly_sales(id, week_date, week_number, month_number, calendar_year, region, platform, segment, age_band, demographics, customer_type, transactions, sales,avg_transactions)
 SELECT id, week_date, WEEK(week_date) week_number, MONTH(week_date) month_number, YEAR(week_date) calendar_year,
@@ -102,12 +102,14 @@ FROM clean_weekly_sales;
 SELECT WEEK('2020-12-31');
 ```
 ![1](https://user-images.githubusercontent.com/107050974/188320441-be108141-a326-45f6-b54e-3f145aaac26b.png)
+
 **First 15 records of the 'clean_weekly_sales' table**
 
 ## PART B (Data Exploration)
 
 1. What day of the week is used for each week_date value?
-* I used the **DAYNAME** function to return the coresponding name of each 'week_date'. Then I used the **GROUP BY** function to categorize the results*
+
+*I used the **DAYNAME** function to return the coresponding name of each 'week_date'. Then I used the **GROUP BY** function to categorize the results*
 ```sql
 SELECT DAYNAME(week_date) day_of_week, COUNT(week_date) total_records
 FROM clean_weekly_sales
@@ -118,7 +120,8 @@ GROUP BY 1;
 **Monday is the start day for every week_date in this datatset consiting of 17,117 records**
 
 2. What range of week numbers are missing from the dataset?
-*I used the **RECURSIVE CTE** called numbers to generate a table with a column 'weeks' of values ranging from 0-52.*
+
+*I used a **RECURSIVE CTE** called numbers to generate a table with a column 'weeks' of values ranging from 0-52.*
 *Then used a nested query and the **NOT IN** function to filter weeks that are missing(not in the dataset)*
 ```sql
 WITH RECURSIVE numbers as(
@@ -132,9 +135,10 @@ WHERE weeks NOT IN (SELECT DISTINCT(week_number) weekly_number FROM clean_weekly
 ```
 ![2](https://user-images.githubusercontent.com/107050974/188321542-73599360-05d6-4c4d-9eba-a636553659ad.png)
 
-**There are 29 weeks missing out of 53 weeks in a year from the dataset**
+**There are 29 weeks missing out of the 53 weeks in a year from the dataset**
 
 3. How many total transactions were there for each year in the dataset?
+
 *I used the **SUM** function to calculate the total number of transactions, the **SUM** function to calculate the total amount sold and used the **GROUP BY** function to categorize results per year* 
 ```sql
 SELECT calendar_year, SUM(transactions) total_transactions, SUM(sales) total_amount
@@ -174,7 +178,8 @@ GROUP BY 1;
 
 6. What is the percentage of sales for Retail vs Shopify for each month?
 
-*With a SUBQUERY, I used CASE statements to create two columns 'retail' and 'shopify' which consists of the total sales done through the Retail platform and the total sales done on the online platform(Shopify) respectively.*
+*With a SUBQUERY, I used **CASE** statements to create two columns 'retail' and 'shopify' which consists of the total sales done through the Retail platform and the total sales done on the online platform(Shopify) respectively.*
+
 *I calculated both platform's percentage of total sales and used a GROUP BY function to categorize both platforms and show records per month.*
 ```sql
 SELECT calendar_year, MONTHNAME(week_date) months, ROUND((SUM(retail)/SUM(total_sales))*100,1) retail_percent,
@@ -194,7 +199,8 @@ ORDER BY 1,STR_TO_DATE(months,'%M');
 **The Retail platform accounts for over 97% of all sales but we can notice the slight consistent increase in the shopify platform sales over the year**
 
 7. What is the percentage of sales by demographic for each year in the dataset?
-*Using multiple CASE statements I created columns with each demographic category.* 
+
+*Using multiple **CASE** statements I created columns with each demographic category.* 
 *Then calculated the percentage of sales each demograpic category contributed to the total sales in each year.*
 ```sql
 SELECT calendar_year, ROUND((SUM(couples)/SUM(total_sales))*100,1) couples_percent, ROUND((SUM(families)/SUM(total_sales))*100,1) families_percent,
@@ -253,9 +259,9 @@ Using this analysis approach - answer the following questions:
 
 1. What is the total sales for the 4 weeks before and after 2020-06-15? What is the growth or reduction rate in actual values and percentage of sales?
 
-*With the WHERE clause I set multiple conditions such as my start date and what range my week number can be found in. I used the WEEK function to return the coresponding week number of the date specified and the BETWEEN function to set boundaries*
+*With the **WHERE** clause I set multiple conditions such as my start date and what range my week number can be found in. I used the **WEEK** function to return the coresponding week number of the date specified and the **BETWEEN** function to set boundaries*
 
-*I subtracted the total sales before the change from the total sales after the change to get thee diffrence in value, I also calculated for the growth/reduction rate.*
+*I subtracted the total sales before the change from the total sales after the change to get the diffrence in value, I also calculated for the growth/reduction rate in the 'percent' column.*
 ```sql
 WITH after_changes AS( 
         SELECT SUM(sales) total_sales_after
@@ -289,11 +295,11 @@ before_changes AS(
 ```
 ![2](https://user-images.githubusercontent.com/107050974/188322328-e3d9314e-c5fa-4d3e-bdea-946442da6dd4.png)
 
-**Comparing the growth/retention rate between the sum of sales, four weeks before implementing the Data Mart sustainable packaging changes and four weeks after implementing the changes . The rentention rate is -65.8% and the actutal value is -13,432,274,108**
+**Comparing the growth/retention rate between the sum of sales, twelve weeks before implementing the Data Mart sustainable packaging changes and twelve weeks after implementing the changes . The rentention rate is -65.8% and the actutal value is -13,432,274,108**
 
 3. How do the sale metrics for these 2 periods before and after compare with the previous years in 2018 and 2019?
 
-*In this query I assumed I was asked to calculate the 4weeks/12weeks before and after period for the year of 2020(third),2019(second) and 2018(first) using 2020-06-15 as the baseline week*
+*In this query I assumed I was asked to calculate the 4weeks/12weeks before and after period for the year of 2020(third),2019(second) and 2018(first) using 2020-06-15,2019-06-15 and 2018-06-15 respectively as the baseline week(s)*
 ```sql
 -- FOR THE YEAR 2020
 WITH before_third_12weeks AS( 
@@ -400,6 +406,8 @@ FROM first_year;
 - age_band
 - demographic
 - customer_type
+
+*Here I compared the negative impact for the various category types(region,platform,age_band,demographic and customer_type). Check BUSINESS NEEDS below to see what category had the highest negative impact for each category type*
 ```sql
 -- BASED ON REGION
 WITH after_region AS(	
