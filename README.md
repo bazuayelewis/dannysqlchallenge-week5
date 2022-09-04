@@ -510,7 +510,7 @@ The key business question he wants you to help him answer are the following:
 
 -1. What was the quantifiable impact of the changes introduced in June 2020?
 
-In 2020, the sales reduced by **65.5%** after 4 weeks and **65.8%**after 12 weeks.
+In 2020, the sales reduced by **65.5%** after 4 weeks and **65.8%** after 12 weeks.
     
 -2. Which platform, region, segment and customer types were the most impacted by this change?
 
